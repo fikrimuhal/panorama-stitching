@@ -1,0 +1,3 @@
+2. konum, 1. konumun 1 metre kuzeye ötelenmiş halidir.
+3. konum, 2. konumun 1 metre batıya ötelenmiş halidir.
+3. dataset oluşturulurken, parktaki çocuk sarı böceğin üzerindeki 3 numarayı çıkarttı.
