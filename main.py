@@ -115,5 +115,5 @@ while(1):
         break
     elif(cv2.waitKey(0)):
         break
-locData = pd.read_csv('iCloudPhotos/firstlocation.csv')
+#locData = pd.read_csv('iCloudPhotos/firstlocation.csv')
 newX = getDegreeForPixel(mouseX, stitched)
