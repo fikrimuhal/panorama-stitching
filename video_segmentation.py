@@ -4,7 +4,6 @@ import imutils # Image processing library
 import os # Operating system library 
 
 cap = cv2.VideoCapture('sample_videos/occlusions-1.avi')
-#ORIG_IMG_FILE = 'unstitched/boat03.jpg'
 VIDEO_DIMENSIONS = (704, 576) # Dimensions that ENet was trained on
 RESIZED_WIDTH = 600
 IMG_NORM_RATIO = 1 / 255.0 # In grayscale a pixel can range between 0 and 255
