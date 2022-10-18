@@ -8,16 +8,17 @@ def stitcherFunc(image_source, scale_percent):
     for image in image_source:
         img = cv2.imread(image)
         images.append(img)
-        print(image+" appended.")
+        print(image + " appended.")
         cv2.waitKey(0)
     print("Stitching started.")
     error, stitched_img = imageStitcher.stitch(images)
+    #cropped = cropImg(stitched_img, 30)
+    #large = cv2.hconcat([stitched_img, cropped])
+    #cv2.imwrite("slm.jpg", large)
     if not error:
-        width = int(stitched_img.shape[1] * scale_percent / 100)
-        height = int(stitched_img.shape[0] * scale_percent / 100)
-        dim = (width,height)
-        resized = cv2.resize(stitched_img, dim, interpolation=cv2.INTER_AREA)
+        #resized = resizer(large, scale_percent)
         print("Stitching completed.")
     else:
-        print("error",error)
-    return resized
+        print("error", error)
+    #return resized
+    return stitched_img
