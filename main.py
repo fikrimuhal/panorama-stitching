@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import time
+import math
 
 DEGREE_CONST = 360
 DEGREE_GAP = 54
@@ -21,6 +22,7 @@ def mEvent(event, x, y, flags, param):
         locations.append([mouseX, mouseY])
         print("x line = " + str(getDegreeForPixelV(stitched4, mouseX)))
         print("y line = " + str(getDegreeForPixelH(stitched4, mouseY)))
+        print("new y line = " + str(getDegreeForPixelH2(stitched4, mouseY)))
         print(mouseX, mouseY)
 
 def createVerticalLine(image, position):
@@ -28,7 +30,7 @@ def createVerticalLine(image, position):
     ep = (position, image.shape[0])
     c = (255, 255, 255)
     t = 4
-    print("v line printed at : ", position)
+    #print("v line printed at : ", position)
     return cv2.line(image, sp, ep, c, t)
 
 def createHorizontalLine(image, position):
@@ -36,16 +38,19 @@ def createHorizontalLine(image, position):
     ep = (image.shape[1], position)
     c = (255, 255, 255)
     t = 4
-    print("h line printed at : ", position)
+    #print("h line printed at : ", position)
     return cv2.line(image, sp, ep, c, t)
+def getDegreeForPixelH2(img, px): #math.sin
+    # sin = karsi / hipotenus
+    # sin = px / img.shape[0]
+    px = abs(px-(img.shape[0]/2))
+    px = px / (img.shape[0]/2)
+    px = math.degrees(math.asin(px))
+    return px
 
 def getDegreeForPixelH(img, px):
     degree = (DEGREE_CONST / 2) * (px / img.shape[0])
     return abs(degree - (DEGREE_CONST / 4))
-    #if(degree<0):
-    #    return degree + 360
-    #else:
-    #    return degree % 360
 
 def getDegreeForPixelV(img, px):
     degree = (DEGREE_CONST + image_wide_const) * (px / img.shape[1]) - DEGREE_GAP
@@ -60,7 +65,7 @@ def getPixelForVerticalDegree(img, deg):
 def getPixelForHorizontalDegree(img, deg):
     return (deg * img.shape[0] ) / (DEGREE_CONST + image_wide_const)
 
-def createVerticalLineForPixel(img, deg):
+def createVerticalLineForPixel(img):
     linePerDegree = 20
     imageWidth = img.shape[1] # 360 + 30 = 390 degree image.
     pixelPerDegree = imageWidth / (DEGREE_CONST + image_wide_const)
@@ -72,7 +77,7 @@ def createVerticalLineForPixel(img, deg):
         negativePoint = negativePoint - (pixelPerDegree * linePerDegree)
         startingPoint = startingPoint + (pixelPerDegree * linePerDegree)
 
-def createHorizontalLineForPixel(img, deg):
+def createHorizontalLineForPixel(img):
     linePerDegree = 20
     imageHeight = img.shape[0] # 180 degree image.
     pixelPerDegree = imageHeight / (DEGREE_CONST / 2) # 360 / 2 = 180
@@ -80,10 +85,8 @@ def createHorizontalLineForPixel(img, deg):
     while(startingPoint < imageHeight):
         createHorizontalLine(img, int(startingPoint))
         startingPoint = startingPoint + (pixelPerDegree * linePerDegree)
-    #px = getPixelForHorizontalDegree(img, deg)
-    #return createHorizontalLine(img, int(px))
 
-def createText(img, text, poz):
+def createText(img):
     linePerDegree = 20
     imageWidth = img.shape[1] # 360 + 30 = 390 degree image.
     pixelPerDegree = imageWidth / (DEGREE_CONST + image_wide_const)
@@ -97,20 +100,19 @@ def createText(img, text, poz):
     thickness = 6
     while(startingPoint < imageWidth):
         gap = len(str(startingDegree % 360)) * 10 * fontScale
-        org = (int(startingPoint - gap), 100)        
+        org = (int(startingPoint - gap), 100)
         cv2.putText(img, str(int(startingDegree % 360)), org, font, fontScale, color, thickness, cv2.LINE_AA)
         startingDegree = startingDegree + linePerDegree
         startingPoint = startingPoint + (pixelPerDegree * linePerDegree)
     while(negativePoint > 0):
         neggap = len(str(negativeDegree % 360)) * 10 * fontScale
-        negorg = (int(negativePoint - neggap), 100) 
-        print("sslm", negorg[0], negorg[1], str(int(negativeDegree % 360)))
+        negorg = (int(negativePoint - neggap), 100)
+        #print("sslm", negorg[0], negorg[1], str(int(negativeDegree % 360)))
         cv2.putText(img, str(int(negativeDegree % 360)), negorg, font, fontScale, color, thickness, cv2.LINE_AA)
         negativeDegree = negativeDegree - linePerDegree
         if(negativeDegree < 0):
             negativeDegree = negativeDegree + 360
         negativePoint = negativePoint - (pixelPerDegree * linePerDegree)
-    #return cv2.putText(img, text, org, font, fontScale, color, thickness, cv2.LINE_AA)
 
 def cropImg(img, percent):
     w = img.shape[0]
@@ -123,30 +125,26 @@ def resizer(img, percent):
     d = (w, h)
     return cv2.resize(img, d, interpolation = cv2.INTER_AREA)
 
-image_paths = glob.glob('iCloud Photos/ilk konum/*.JPEG')
+image_paths = glob.glob('ev/*.JPG')
 new_file_name = "first_location_stitched_10"
 timestr = str("IMG_" + time.strftime("%Y%m%d-%H%M%S"))
-#stitched = stitcherFunc(image_paths, scale_percent)
-stitched = cv2.imread("test_imgs/IMG_20221017-234731.png")
+stitched = stitcherFunc(image_paths)
+#stitched = cv2.imread("test_imgs/IMG_20221017-234731.png")
 stitched2 = cropImg(stitched, image_wide_const)
 stitched3 = cv2.hconcat([stitched, stitched2])
 cv2.namedWindow('image')
 cv2.setMouseCallback('image', mEvent)
 while(1):
-    #for i in np.arange(0, 360, 20): #vertical operations
-    createVerticalLineForPixel(stitched3, 20) #create vertical line per 20 degree
-    #j = getPixelForVerticalDegree(stitched3, 20)
-    createText(stitched3, "20", 20)
-    #for i in np.arange(0, 360, 20): #horizontal operations
-    createHorizontalLineForPixel(stitched3, 20) #create horizontal line per 20 degree
-    #cv2.imshow("image", stitched4)
+    createVerticalLineForPixel(stitched3) #create vertical lines
+    createText(stitched3)
+    createHorizontalLineForPixel(stitched3) #create horizontal line per 20 degree
     if(a):
         a = False
         cv2.imwrite("test_imgs/" + timestr + ".png", stitched)
         stitched4 = resizer(stitched3, scale_percent)
-    cv2.imshow("image", stitched4)    
-    print("ilk 10 konumu belirle.")
-    print(len(locations))
+    cv2.imshow("image", stitched4)
+    #print("ilk 10 konumu belirle.")
+    #print(len(locations))
     if(len(locations) == 10):
         print("completed.")
         break
